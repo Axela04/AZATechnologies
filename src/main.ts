@@ -4,7 +4,7 @@
 // rotation, and the input/readout panel.
 
 import { solve } from "./ductulator.js";
-import { buildWheel, rotationFor, frictionAngle } from "./wheel.js";
+import { buildWheel, rotationFor, cfmFromRotation } from "./wheel.js";
 import { buildCard } from "./card.js";
 
 interface Inputs {
@@ -71,17 +71,9 @@ function inputsFromRotation() {
   // When the user spins the wheel directly, we keep the friction value as-is
   // and infer CFM from the rotation, then recompute the rest.
   const { friction } = inputs();
-  const cfm = invertCfmFromRotation(rotation, friction);
+  const cfm = clamp(cfmFromRotation(rotation, friction), 30, 100000);
   cfmInput.value = String(Math.round(cfm));
   updateReadout();
-}
-
-function invertCfmFromRotation(rot: number, friction: number): number {
-  // rotation = frictionAngle(F) - cfmAngle(Q)  ⇒  cfmAngle(Q) = frictionAngle(F) - rotation
-  const target = frictionAngle(friction) - rot;
-  // cfmAngle(Q) = 76 * log10(Q / 1000)  ⇒  Q = 1000 * 10^(target/76)
-  const q = 1000 * Math.pow(10, target / 76);
-  return clamp(q, 30, 100000);
 }
 
 // --- Pointer-driven rotation -------------------------------------------------
