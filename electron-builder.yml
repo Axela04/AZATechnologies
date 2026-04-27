@@ -1,0 +1,32 @@
+appId: com.azatechnologies.ductulator
+productName: AZA Ductulator
+copyright: "© AZA Technologies"
+
+directories:
+  output: release
+  buildResources: build
+
+files:
+  - "dist/**/*"
+  - "electron/**/*"
+  - "package.json"
+
+mac:
+  category: public.app-category.utilities
+  target:
+    - target: mas
+      arch:
+        - universal
+    - target: dmg
+      arch:
+        - universal
+  hardenedRuntime: true
+  gatekeeperAssess: false
+  entitlements: build/entitlements.mas.plist
+  entitlementsInherit: build/entitlements.mas.inherit.plist
+  provisioningProfile: build/embedded.provisionprofile
+
+mas:
+  entitlements: build/entitlements.mas.plist
+  entitlementsInherit: build/entitlements.mas.inherit.plist
+  hardenedRuntime: false

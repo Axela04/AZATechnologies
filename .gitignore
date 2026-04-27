@@ -1,0 +1,16 @@
+node_modules/
+dist/
+release/
+android/
+.cache/
+.vite/
+*.log
+*.tsbuildinfo
+.DS_Store
+.env
+.env.*
+!.env.example
+build/embedded.provisionprofile
+*.mobileprovision
+*.p12
+*.cer
