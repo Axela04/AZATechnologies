@@ -15,35 +15,30 @@
       <header class="topbar">
         <div class="brand">
           <span class="brand-mark">AZA</span>
-          <span class="brand-name">Technologies</span>
+          <span class="brand-name">Technologies · Ductulator</span>
         </div>
         <button id="resetBtn" class="ghost-btn" type="button">Reset</button>
       </header>
 
       <main class="stage">
         <div id="wheelContainer" class="wheel-container">
-          <!-- SVG layers are injected by src/main.ts -->
+          <!-- SVG layers + readout chips are injected by src/main.ts -->
         </div>
-
-        <section class="readout" aria-label="Calculated values">
-          <div class="field">
-            <label for="cfmInput">Air Quantity (CFM)</label>
-            <input id="cfmInput" type="number" inputmode="decimal" min="30" max="100000" step="10" value="300" />
-          </div>
-          <div class="field">
-            <label for="frictionInput">Friction Loss (in. wg / 100 ft)</label>
-            <input id="frictionInput" type="number" inputmode="decimal" min="0.01" max="5" step="0.01" value="0.08" />
-          </div>
-          <div class="results">
-            <div class="result"><span class="rl">Velocity</span><span id="rVelocity" class="rv">–</span><span class="ru">FPM</span></div>
-            <div class="result"><span class="rl">Round Diameter</span><span id="rDiameter" class="rv">–</span><span class="ru">in</span></div>
-            <div class="result wide"><span class="rl">Equivalent Rectangular</span><span id="rRect" class="rv">–</span></div>
-          </div>
-          <p class="hint">Drag the wheel to spin it like the physical card. Inputs above auto-rotate the wheel to match.</p>
-        </section>
       </main>
 
-      <footer class="footer">Metal Duct Only · ASHRAE-style approximation · © AZA Technologies</footer>
+      <section class="picker" aria-label="Set values">
+        <label class="chip">
+          <span class="chip-key">CFM</span>
+          <input id="cfmInput" type="number" inputmode="decimal" min="30" max="100000" step="10" value="300" />
+        </label>
+        <span class="picker-sep">↔</span>
+        <label class="chip">
+          <span class="chip-key">FRICTION LOSS</span>
+          <input id="frictionInput" type="number" inputmode="decimal" min="0.01" max="5" step="0.01" value="0.08" />
+          <span class="chip-unit">in. wg / 100 ft</span>
+        </label>
+        <p class="hint">Drag the wheel to spin it. Numbers above set the alignment.</p>
+      </section>
     </div>
 
     <script type="module" src="/src/main.ts"></script>

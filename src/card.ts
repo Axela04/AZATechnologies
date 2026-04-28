@@ -190,25 +190,16 @@ export function buildCard(): SVGSVGElement {
     "text-anchor": "middle",
   }));
 
-  const instr: [string, string][] = [
-    ["A", "Establish Air Quantity (CFM) and Friction Loss."],
-    ["B", "Set Air Quantity (CFM) opposite of Friction Loss."],
-    ["C", "Read Velocity (FPM) opposite of Air Quantity (CFM)."],
-    ["D", "Read Duct Diameter opposite of arrow."],
-    ["E", "Read Equivalent Rectangular Duct Dimensions."],
-  ];
-  center.appendChild(text(-150, 22, "INSTRUCTIONS", {
-    fill: RULE,
-    "font-size": 11,
-    "font-weight": 800,
-    "font-family": "Arial, Helvetica, sans-serif",
-    "letter-spacing": "0.12em",
-  }));
-  instr.forEach(([k, v], i) => {
-    const y = 40 + i * 14;
-    center.appendChild(text(-150, y, k, { fill: RULE, "font-size": 10, "font-weight": 700, "font-family": "Arial, Helvetica, sans-serif" }));
-    center.appendChild(text(-138, y, v, { fill: RULE, "font-size": 10, "font-family": "Arial, Helvetica, sans-serif" }));
-  });
+  center.appendChild(
+    text(0, 28, "Spin to align CFM with Friction Loss · read D, FPM, Rectangular at the indicators", {
+      fill: RULE,
+      "font-size": 11,
+      "font-family": "Arial, Helvetica, sans-serif",
+      "letter-spacing": "0.04em",
+      "text-anchor": "middle",
+      opacity: 0.65,
+    })
+  );
   svg.appendChild(center);
 
   return svg;
