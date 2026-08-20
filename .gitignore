@@ -3,6 +3,8 @@ dist/
 release/
 android/
 screenshots/
+vectorized/
+standalone/
 .cache/
 .vite/
 *.log
