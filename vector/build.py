@@ -1,0 +1,263 @@
+import json
+t = json.load(open('/tmp/traced.json'))
+HT, HB, RD = t['hub_t'], t['hub_b'], t['r_disc']
+def layer(k, cls):
+    tf, d = t[k]; return f'<g transform="{tf}" class="{cls}"><path d="{d}"/></g>'
+disc = f'<g transform="translate({-HB[0]:.1f},{-HB[1]:.1f})">{layer("disc","engrave")}</g>'
+card = (f'<g transform="translate({-HT[0]:.1f},{-HT[1]:.1f})">'
+        f'{layer("card","stock")}{layer("ink","engrave")}{layer("red","spot")}</g>')
+
+HTML = r'''<title>Ductulator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@400;500;600&display=swap">
+
+<style>
+  :root {
+    --ground:#dcdfe4; --ground-2:#cbd1d8; --line:#b4bcc6;
+    --ink:#1b2129; --ink-dim:#5b6672; --accent:#b8332a;
+    --paper:#fdfcf9; --engrave:#15181c; --spot:#c0362b;
+    --shadow:rgba(23,30,38,.30); --focus:#2f6ecb;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:#171c22; --ground-2:#0f131a; --line:#2e3841;
+      --ink:#e3e8ee; --ink-dim:#8b95a3; --accent:#e0574c;
+      --paper:#f4f2ec; --engrave:#15181c; --spot:#c0362b;
+      --shadow:rgba(0,0,0,.60); --focus:#6ea8ff;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground:#171c22; --ground-2:#0f131a; --line:#2e3841;
+    --ink:#e3e8ee; --ink-dim:#8b95a3; --accent:#e0574c;
+    --paper:#f4f2ec; --engrave:#15181c; --spot:#c0362b;
+    --shadow:rgba(0,0,0,.60); --focus:#6ea8ff;
+  }
+
+  * { box-sizing:border-box; }
+  body {
+    margin:0; min-height:100dvh;
+    background:var(--ground);
+    background-image:radial-gradient(120% 88% at 50% 30%, var(--ground) 40%, var(--ground-2) 100%);
+    color:var(--ink);
+    font-family:"IBM Plex Sans Condensed","Helvetica Neue",Arial,sans-serif;
+    display:flex; flex-direction:column;
+    overflow:hidden; overscroll-behavior:none;
+    -webkit-tap-highlight-color:transparent;
+  }
+
+  .bench { flex:1 1 auto; min-height:0; display:grid; place-items:center; padding:clamp(6px,1.8vmin,24px); }
+
+  .instrument {
+    position:relative; aspect-ratio:1/1;
+    width:min(100%, calc(100dvh - 128px)); max-width:94vmin;
+    touch-action:none; cursor:grab; border-radius:50%; outline:none;
+    user-select:none; -webkit-user-select:none;
+  }
+  .instrument.grabbing { cursor:grabbing; }
+  .instrument:focus-visible { box-shadow:0 0 0 3px var(--focus); }
+  .instrument::before {
+    content:""; position:absolute; inset:4%; border-radius:50%;
+    background:var(--shadow); filter:blur(16px); transform:translateY(1.2%); z-index:0;
+  }
+
+  .layer { position:absolute; inset:0; width:100%; height:100%; display:block; overflow:visible; }
+  .layer.disc { z-index:1; }
+  .layer.card { z-index:2; transform-origin:50% 50%; will-change:transform; }
+  .layer.hub  { z-index:3; pointer-events:none; }
+
+  .stock{fill:var(--paper)} .engrave{fill:var(--engrave)} .spot{fill:var(--spot)}
+  .disc-face{ fill:var(--paper); }
+  .pivot-ring{fill:none;stroke:color-mix(in srgb,var(--engrave) 45%,transparent);stroke-width:4}
+  .pivot-cap{fill:var(--engrave)} .pivot-hi{fill:color-mix(in srgb,var(--paper) 65%,transparent)}
+
+  .strip {
+    flex:0 0 auto; display:flex; align-items:center; justify-content:center;
+    gap:clamp(10px,2.2vw,22px); flex-wrap:wrap;
+    padding:11px clamp(12px,3vw,26px) calc(11px + env(safe-area-inset-bottom));
+    border-top:1px solid var(--line);
+  }
+  .readout { display:flex; align-items:baseline; gap:9px; }
+  .readout .val {
+    font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+    font-variant-numeric:tabular-nums;
+    font-size:clamp(21px,4.2vw,28px); font-weight:500;
+    min-width:5.4ch; text-align:right; color:var(--ink);
+  }
+  .readout .lbl { font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--ink-dim); }
+
+  .controls { display:flex; gap:7px; }
+  button {
+    font-family:inherit; font-size:12px; font-weight:500; letter-spacing:.12em;
+    text-transform:uppercase; color:var(--ink); background:transparent;
+    border:1px solid var(--line); border-radius:3px; padding:9px 15px; cursor:pointer;
+    transition:border-color .15s,color .15s;
+  }
+  button:hover { border-color:var(--accent); color:var(--accent); }
+  button:focus-visible { outline:2px solid var(--focus); outline-offset:2px; }
+  button.nudge { font-family:"IBM Plex Mono",monospace; letter-spacing:0; padding:9px 11px; }
+
+  .hint { font-size:12px; color:var(--ink-dim); margin:0; }
+  .hint kbd {
+    font-family:"IBM Plex Mono",monospace; font-size:11px;
+    border:1px solid var(--line); border-bottom-width:2px; border-radius:3px;
+    padding:1px 5px; color:var(--ink);
+  }
+  @media (max-width:660px){ .hint{display:none} }
+</style>
+
+<div class="bench">
+  <div class="instrument" id="rig" tabindex="0" role="slider"
+       aria-label="Ductulator card rotation" aria-valuemin="0" aria-valuemax="360"
+       aria-valuenow="0" aria-valuetext="0 degrees">
+    <svg class="layer disc" viewBox="-1220 -1220 2440 2440" aria-hidden="true">
+      <circle class="disc-face" cx="0" cy="0" r="__RD__"/>
+      __DISC__
+    </svg>
+    <svg class="layer card" id="card" viewBox="-1220 -1220 2440 2440" aria-hidden="true">
+      __CARD__
+    </svg>
+    <svg class="layer hub" viewBox="-1220 -1220 2440 2440" aria-hidden="true">
+      <circle class="pivot-ring" cx="0" cy="0" r="30"/>
+      <circle class="pivot-cap"  cx="0" cy="0" r="21"/>
+      <circle class="pivot-hi"   cx="-6" cy="-7" r="6"/>
+    </svg>
+  </div>
+</div>
+
+<div class="strip">
+  <div class="readout">
+    <span class="val" id="deg">0.0&deg;</span>
+    <span class="lbl">Card angle</span>
+  </div>
+  <div class="controls">
+    <button class="nudge" id="ccw" type="button" aria-label="Rotate one degree counter-clockwise">&minus;1&deg;</button>
+    <button class="nudge" id="cw"  type="button" aria-label="Rotate one degree clockwise">+1&deg;</button>
+    <button id="reset" type="button">Reset</button>
+  </div>
+  <p class="hint">Drag the card to spin it &middot; flick to let it coast &middot; <kbd>&larr;</kbd><kbd>&rarr;</kbd> nudge, <kbd>shift</kbd> for fine</p>
+</div>
+
+<script>
+(function () {
+  var card = document.getElementById('card'),
+      rig  = document.getElementById('rig'),
+      out  = document.getElementById('deg'),
+      reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Paper on paper around a metal grommet: it carries a little momentum,
+  // then stops. Integrated against real elapsed time so the feel is the
+  // same on a 60Hz and a 120Hz display.
+  var RETAIN_PER_SEC = 0.02,   // fraction of angular velocity kept after 1s
+      STOP_BELOW     = 6,      // deg/s
+      MAX_VEL        = 900;    // deg/s
+
+  var angle = 0, vel = 0, raf = 0, dragging = false, pointerId = -1,
+      lastAng = 0, lastT = 0;
+
+  var norm = function (a) { return ((a % 360) + 360) % 360; };
+
+  function render() {
+    card.style.transform = 'rotate(' + angle.toFixed(3) + 'deg)';
+    var n = norm(angle);
+    out.textContent = n.toFixed(1) + '°';
+    rig.setAttribute('aria-valuenow', n.toFixed(0));
+    rig.setAttribute('aria-valuetext', n.toFixed(1) + ' degrees');
+  }
+
+  function pointerAngle(ev) {
+    var r = rig.getBoundingClientRect();
+    return Math.atan2(ev.clientX - (r.left + r.width / 2),
+                     -(ev.clientY - (r.top + r.height / 2))) * 180 / Math.PI;
+  }
+  function shortest(a, b) {
+    var d = a - b;
+    while (d >  180) d -= 360;
+    while (d < -180) d += 360;
+    return d;
+  }
+
+  function halt() { if (raf) { cancelAnimationFrame(raf); raf = 0; } vel = 0; }
+
+  function coast(now) {
+    var dt = Math.min(50, now - lastT) / 1000;   // clamp: a throttled tab must not teleport
+    lastT = now;
+    angle += vel * dt;
+    vel   *= Math.pow(RETAIN_PER_SEC, dt);
+    render();
+    if (Math.abs(vel) < STOP_BELOW) { vel = 0; raf = 0; return; }
+    raf = requestAnimationFrame(coast);
+  }
+
+  // Deliberately no setPointerCapture here. Capturing a mouse pointer keeps
+  // retargeting that pointerId to this element, so the next click on a button
+  // in the control strip would be swallowed. Window listeners are both simpler
+  // and correct when the drag leaves the element.
+  rig.addEventListener('pointerdown', function (ev) {
+    if (ev.button !== 0 && ev.pointerType === 'mouse') return;
+    halt();
+    dragging = true;
+    pointerId = ev.pointerId;
+    rig.classList.add('grabbing');
+    card.style.transition = 'none';
+    lastAng = pointerAngle(ev);
+    lastT = ev.timeStamp;
+    ev.preventDefault();
+  });
+
+  window.addEventListener('pointermove', function (ev) {
+    if (!dragging || ev.pointerId !== pointerId) return;
+    var a = pointerAngle(ev), d = shortest(a, lastAng),
+        dt = Math.max(4, ev.timeStamp - lastT);
+    angle += d;
+    // smooth the release velocity so one jittery frame can't fling the card
+    vel = vel * 0.6 + (d / dt * 1000) * 0.4;
+    lastAng = a; lastT = ev.timeStamp;
+    render();
+  });
+
+  function release(ev) {
+    if (!dragging || ev.pointerId !== pointerId) return;
+    dragging = false;
+    pointerId = -1;
+    rig.classList.remove('grabbing');
+    if (ev.timeStamp - lastT > 80) vel = 0;          // paused before letting go = no throw
+    vel = Math.max(-MAX_VEL, Math.min(MAX_VEL, vel));
+    if (reduce || Math.abs(vel) < STOP_BELOW) { vel = 0; return; }
+    lastT = performance.now();
+    raf = requestAnimationFrame(coast);
+  }
+  window.addEventListener('pointerup', release);
+  window.addEventListener('pointercancel', release);
+  rig.addEventListener('dragstart', function (ev) { ev.preventDefault(); });
+
+  function nudge(step) { halt(); card.style.transition = 'none'; angle += step; render(); }
+  document.getElementById('cw').onclick  = function () { nudge(1); };
+  document.getElementById('ccw').onclick = function () { nudge(-1); };
+
+  document.getElementById('reset').onclick = function () {
+    halt();
+    var target = angle - shortest(norm(angle), 0);   // unwind the short way round
+    if (reduce) { card.style.transition = 'none'; angle = 0; render(); return; }
+    card.style.transition = 'transform 500ms cubic-bezier(.22,.9,.24,1)';
+    angle = target; render();
+    setTimeout(function () { card.style.transition = 'none'; angle = 0; render(); }, 520);
+  };
+
+  rig.addEventListener('keydown', function (ev) {
+    var s = ev.shiftKey ? 0.1 : 1;
+    if (ev.key === 'ArrowLeft'  || ev.key === 'ArrowDown') { nudge(-s);  ev.preventDefault(); }
+    else if (ev.key === 'ArrowRight' || ev.key === 'ArrowUp') { nudge(s); ev.preventDefault(); }
+    else if (ev.key === 'PageUp')   { nudge(15);  ev.preventDefault(); }
+    else if (ev.key === 'PageDown') { nudge(-15); ev.preventDefault(); }
+    else if (ev.key === 'Home')     { nudge(-norm(angle)); ev.preventDefault(); }
+  });
+
+  render();
+})();
+</script>
+'''
+HTML = HTML.replace('__DISC__', disc).replace('__CARD__', card).replace('__RD__', str(RD))
+out = '/tmp/claude-0/-home-user-AZATechnologies/a1c93982-bbd8-5965-9180-7760b6fa3238/scratchpad/ductulator.html'
+open(out,'w').write(HTML)
+print(f"{len(HTML):,} bytes")
