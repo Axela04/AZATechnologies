@@ -1,13 +1,4 @@
-import json
-t = json.load(open('/tmp/traced.json'))
-HT, HB, RD = t['hub_t'], t['hub_b'], t['r_disc']
-def layer(k, cls):
-    tf, d = t[k]; return f'<g transform="{tf}" class="{cls}"><path d="{d}"/></g>'
-disc = f'<g transform="translate({-HB[0]:.1f},{-HB[1]:.1f})">{layer("disc","engrave")}</g>'
-card = (f'<g transform="translate({-HT[0]:.1f},{-HT[1]:.1f})">'
-        f'{layer("card","stock")}{layer("ink","engrave")}{layer("red","spot")}</g>')
-
-HTML = r'''<title>Ductulator</title>
+<title>Ductulator</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@400;500;600&display=swap">
@@ -61,10 +52,16 @@ HTML = r'''<title>Ductulator</title>
     background:var(--shadow); filter:blur(16px); transform:translateY(1.2%); z-index:0;
   }
 
-  .layer { position:absolute; inset:0; width:100%; height:100%; display:block; overflow:visible; }
+  /* The layers are artwork only: #rig owns every pointer event. This matters
+     because .layer.card is a square element — once rotated, its axis-aligned
+     bounding box grows by up to sqrt(2) and its corners sweep over the control
+     strip below, swallowing clicks on the buttons at some angles but not
+     others. #rig never rotates, so its box stays put. */
+  .layer { position:absolute; inset:0; width:100%; height:100%; display:block;
+           overflow:visible; pointer-events:none; }
   .layer.disc { z-index:1; }
   .layer.card { z-index:2; transform-origin:50% 50%; will-change:transform; }
-  .layer.hub  { z-index:3; pointer-events:none; }
+  .layer.hub  { z-index:3; }
 
   .stock{fill:var(--paper)} .engrave{fill:var(--engrave)} .spot{fill:var(--spot)}
   .disc-face{ fill:var(--paper); }
@@ -110,14 +107,14 @@ HTML = r'''<title>Ductulator</title>
   <div class="instrument" id="rig" tabindex="0" role="slider"
        aria-label="Ductulator card rotation" aria-valuemin="0" aria-valuemax="360"
        aria-valuenow="0" aria-valuetext="0 degrees">
-    <svg class="layer disc" viewBox="-1220 -1220 2440 2440" aria-hidden="true">
-      <circle class="disc-face" cx="0" cy="0" r="__RD__"/>
+    <svg class="layer disc" viewBox="__VIEW__" aria-hidden="true">
+      <circle class="disc-face" cx="0" cy="0" r="__R_DISC__"/>
       __DISC__
     </svg>
-    <svg class="layer card" id="card" viewBox="-1220 -1220 2440 2440" aria-hidden="true">
+    <svg class="layer card" id="card" viewBox="__VIEW__" aria-hidden="true">
       __CARD__
     </svg>
-    <svg class="layer hub" viewBox="-1220 -1220 2440 2440" aria-hidden="true">
+    <svg class="layer hub" viewBox="__VIEW__" aria-hidden="true">
       <circle class="pivot-ring" cx="0" cy="0" r="30"/>
       <circle class="pivot-cap"  cx="0" cy="0" r="21"/>
       <circle class="pivot-hi"   cx="-6" cy="-7" r="6"/>
@@ -256,8 +253,3 @@ HTML = r'''<title>Ductulator</title>
   render();
 })();
 </script>
-'''
-HTML = HTML.replace('__DISC__', disc).replace('__CARD__', card).replace('__RD__', str(RD))
-out = '/tmp/claude-0/-home-user-AZATechnologies/a1c93982-bbd8-5965-9180-7760b6fa3238/scratchpad/ductulator.html'
-open(out,'w').write(HTML)
-print(f"{len(HTML):,} bytes")

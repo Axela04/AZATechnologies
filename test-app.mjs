@@ -1,7 +1,7 @@
 import puppeteer from 'puppeteer';
 import { readFileSync, writeFileSync } from 'node:fs';
 
-const SRC = '/tmp/claude-0/-home-user-AZATechnologies/a1c93982-bbd8-5965-9180-7760b6fa3238/scratchpad/ductulator.html';
+const SRC = '/home/user/AZATechnologies/ductulator.html';
 writeFileSync('/tmp/wrapped.html',
   `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">`+
   `</head><body>${readFileSync(SRC,'utf8')}</body></html>`);
@@ -9,6 +9,8 @@ writeFileSync('/tmp/wrapped.html',
 const results = [];
 const ok = (n,pass,d='') => { results.push({n,pass}); console.log(`  ${pass?'PASS':'FAIL'}  ${n}${d?'  — '+d:''}`); };
 const ang = p => p.$eval('#card', el => parseFloat((el.style.transform.match(/-?[\d.]+/)||[0])[0]));
+const angNextFrame = p => p.evaluate(() => new Promise(res => requestAnimationFrame(() =>
+  res(parseFloat((document.getElementById('card').style.transform.match(/-?[\d.]+/)||[0])[0])))));
 const txt = p => p.$eval('#deg', el => el.textContent);
 const settle = async (p, ms=1600) => { await new Promise(r=>setTimeout(r,ms)); };
 
@@ -45,13 +47,13 @@ try {
       await p.touchscreen.touchStart(cx, cy-R);
       for (let i=1;i<=16;i++){ const t=i/16;
         await p.touchscreen.touchMove(cx+R*Math.sin(t*Math.PI/2), cy-R*Math.cos(t*Math.PI/2)); }
-      midDrag = await ang(p);
+      midDrag = await angNextFrame(p);
       await p.touchscreen.touchEnd();
     } else {
       await p.mouse.move(cx, cy-R); await p.mouse.down();
       for (let i=1;i<=16;i++){ const t=i/16;
         await p.mouse.move(cx+R*Math.sin(t*Math.PI/2), cy-R*Math.cos(t*Math.PI/2)); }
-      midDrag = await ang(p);
+      midDrag = await angNextFrame(p);
       await p.mouse.up();
     }
     ok('drag rotates the card ~90° for a quarter turn', Math.abs(midDrag-90)<3, `${midDrag.toFixed(2)}°`);
