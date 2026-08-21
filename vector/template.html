@@ -1,28 +1,39 @@
-<title>Ductulator</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@400;500;600&display=swap">
+<title>AZA Ductulator</title>
 
 <style>
+  /* ---- AZA brand palette -------------------------------------------------
+     Taken from the AZA mark: azure blue, forest green, and the neutral grey
+     of the wordmark. Every brand colour in the page resolves through these
+     three, so correcting them to the official values is a three-line edit. */
   :root {
-    --ground:#dcdfe4; --ground-2:#cbd1d8; --line:#b4bcc6;
-    --ink:#1b2129; --ink-dim:#5b6672; --accent:#b8332a;
-    --paper:#fdfcf9; --engrave:#15181c; --spot:#c0362b;
-    --shadow:rgba(23,30,38,.30); --focus:#2f6ecb;
+    --aza-blue:  #0F76BC;
+    --aza-green: #3F8F3A;
+    --aza-grey:  #8A8D90;
+
+    --ground:#dee1e6; --ground-2:#ccd1d8; --line:#b3bac4;
+    --ink:#18202a; --ink-dim:#59636f;
+    --accent:var(--aza-blue);
+    --paper:#fdfcfa; --engrave:#16191d;
+    --spot:var(--aza-blue);          /* main printed labels: AZA blue, not red */
+    --shadow:rgba(20,28,38,.30); --focus:#1a6fd4;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
-      --ground:#171c22; --ground-2:#0f131a; --line:#2e3841;
-      --ink:#e3e8ee; --ink-dim:#8b95a3; --accent:#e0574c;
-      --paper:#f4f2ec; --engrave:#15181c; --spot:#c0362b;
-      --shadow:rgba(0,0,0,.60); --focus:#6ea8ff;
+      --ground:#161b21; --ground-2:#0e1218; --line:#2c3641;
+      --ink:#e4e9ef; --ink-dim:#8a94a1;
+      --accent:#4aa8e8;
+      --paper:#f5f3ee; --engrave:#16191d;
+      --spot:#0F76BC;
+      --shadow:rgba(0,0,0,.60); --focus:#6fb0f5;
     }
   }
   :root[data-theme="dark"] {
-    --ground:#171c22; --ground-2:#0f131a; --line:#2e3841;
-    --ink:#e3e8ee; --ink-dim:#8b95a3; --accent:#e0574c;
-    --paper:#f4f2ec; --engrave:#15181c; --spot:#c0362b;
-    --shadow:rgba(0,0,0,.60); --focus:#6ea8ff;
+    --ground:#161b21; --ground-2:#0e1218; --line:#2c3641;
+    --ink:#e4e9ef; --ink-dim:#8a94a1;
+    --accent:#4aa8e8;
+    --paper:#f5f3ee; --engrave:#16191d;
+    --spot:#0F76BC;
+    --shadow:rgba(0,0,0,.60); --focus:#6fb0f5;
   }
 
   * { box-sizing:border-box; }
@@ -31,18 +42,49 @@
     background:var(--ground);
     background-image:radial-gradient(120% 88% at 50% 30%, var(--ground) 40%, var(--ground-2) 100%);
     color:var(--ink);
-    font-family:"IBM Plex Sans Condensed","Helvetica Neue",Arial,sans-serif;
+    font-family:"Segoe UI","Segoe UI Variable Text",system-ui,-apple-system,
+                "Helvetica Neue",Arial,sans-serif;
     display:flex; flex-direction:column;
     overflow:hidden; overscroll-behavior:none;
     -webkit-tap-highlight-color:transparent;
   }
 
-  .bench { flex:1 1 auto; min-height:0; display:grid; place-items:center; padding:clamp(6px,1.8vmin,24px); }
+  /* ---- masthead ---------------------------------------------------------- */
+  .brandbar {
+    flex:0 0 auto; display:flex; align-items:center; gap:10px;
+    padding:10px clamp(12px,3vw,26px) 6px;
+  }
+  .mark { display:flex; align-items:baseline; gap:1px; line-height:1; }
+  .mark-a1, .mark-z, .mark-a2 {
+    font-size:25px; font-weight:700; letter-spacing:.01em;
+  }
+  .mark-a1 { color:var(--aza-blue); }
+  .mark-z  { color:var(--aza-green); }
+  .mark-a2 { color:var(--aza-grey); }
+  .mark-sub {
+    margin-left:9px; font-size:10px; font-weight:600;
+    letter-spacing:.26em; text-transform:uppercase; color:var(--aza-grey);
+  }
+  .wordmark {
+    margin-left:auto;
+    font-size:11px; letter-spacing:.26em; text-transform:uppercase;
+    color:var(--ink-dim); font-weight:600;
+  }
+
+  .bench { flex:1 1 auto; min-height:0; display:grid; place-items:center;
+           padding:clamp(4px,1.4vmin,18px); overflow:hidden; }
+
+  /* The zoomer carries pinch/scroll zoom and pan. Rotation lives one level
+     down on the card, so the two gestures never fight. */
+  .zoomer {
+    position:relative; aspect-ratio:1/1;
+    width:min(100%, calc(100dvh - 176px)); max-width:94vmin;
+    touch-action:none; will-change:transform;
+  }
 
   .instrument {
-    position:relative; aspect-ratio:1/1;
-    width:min(100%, calc(100dvh - 128px)); max-width:94vmin;
-    touch-action:none; cursor:grab; border-radius:50%; outline:none;
+    position:absolute; inset:0;
+    cursor:grab; border-radius:50%; outline:none;
     user-select:none; -webkit-user-select:none;
   }
   .instrument.grabbing { cursor:grabbing; }
@@ -68,91 +110,148 @@
   .pivot-ring{fill:none;stroke:color-mix(in srgb,var(--engrave) 45%,transparent);stroke-width:4}
   .pivot-cap{fill:var(--engrave)} .pivot-hi{fill:color-mix(in srgb,var(--paper) 65%,transparent)}
 
+  /* Typeset scale labels. Segoe UI throughout, so nothing is a traced
+     reproduction of the original card's lettering. */
+  .lbl, .lbl-red {
+    font-family:"Segoe UI","Segoe UI Variable Text",system-ui,-apple-system,
+                "Helvetica Neue",Arial,sans-serif;
+    text-anchor:middle; dominant-baseline:middle;
+  }
+  .lbl { fill:var(--engrave); }
+  .lbl-red { fill:var(--spot); font-weight:700; }
+
+  /* ---- control strip ----------------------------------------------------- */
   .strip {
     flex:0 0 auto; display:flex; align-items:center; justify-content:center;
-    gap:clamp(10px,2.2vw,22px); flex-wrap:wrap;
-    padding:11px clamp(12px,3vw,26px) calc(11px + env(safe-area-inset-bottom));
+    gap:clamp(8px,2vw,20px); flex-wrap:wrap;
+    padding:10px clamp(12px,3vw,26px) calc(10px + env(safe-area-inset-bottom));
     border-top:1px solid var(--line);
   }
   .readout { display:flex; align-items:baseline; gap:9px; }
   .readout .val {
-    font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+    font-family:"Segoe UI","Segoe UI Variable Text",system-ui,monospace;
     font-variant-numeric:tabular-nums;
-    font-size:clamp(21px,4.2vw,28px); font-weight:500;
+    font-size:clamp(20px,4vw,27px); font-weight:600;
     min-width:5.4ch; text-align:right; color:var(--ink);
   }
-  .readout .lbl { font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--ink-dim); }
+  .readout .lbl-cap { font-size:11px; letter-spacing:.16em;
+                      text-transform:uppercase; color:var(--ink-dim); }
 
-  .controls { display:flex; gap:7px; }
+  .controls { display:flex; gap:6px; }
   button {
-    font-family:inherit; font-size:12px; font-weight:500; letter-spacing:.12em;
+    font-family:inherit; font-size:12px; font-weight:600; letter-spacing:.10em;
     text-transform:uppercase; color:var(--ink); background:transparent;
-    border:1px solid var(--line); border-radius:3px; padding:9px 15px; cursor:pointer;
+    border:1px solid var(--line); border-radius:3px; padding:9px 14px; cursor:pointer;
     transition:border-color .15s,color .15s;
   }
   button:hover { border-color:var(--accent); color:var(--accent); }
   button:focus-visible { outline:2px solid var(--focus); outline-offset:2px; }
-  button.nudge { font-family:"IBM Plex Mono",monospace; letter-spacing:0; padding:9px 11px; }
+  button.nudge { font-variant-numeric:tabular-nums; letter-spacing:0; padding:9px 11px; }
 
   .hint { font-size:12px; color:var(--ink-dim); margin:0; }
   .hint kbd {
-    font-family:"IBM Plex Mono",monospace; font-size:11px;
+    font-family:inherit; font-size:11px; font-variant-numeric:tabular-nums;
     border:1px solid var(--line); border-bottom-width:2px; border-radius:3px;
     padding:1px 5px; color:var(--ink);
   }
-  @media (max-width:660px){ .hint{display:none} }
+  @media (max-width:760px){ .hint{display:none} }
+
+  @media (prefers-reduced-motion: reduce) {
+    .layer.card, .zoomer { transition:none !important; }
+  }
 </style>
 
+<div class="brandbar">
+  <!-- Set from type in the brand colours rather than redrawn by hand: the
+       supplied mark was a small raster, and an approximated outline would be a
+       worse likeness than clean letterforms. Drop a real logo in here when
+       there is a vector copy of it. -->
+  <span class="mark" aria-label="AZA Technologies" role="img">
+    <span class="mark-a1">A</span><span class="mark-z">Z</span><span class="mark-a2">A</span>
+    <span class="mark-sub">Technologies</span>
+  </span>
+  <span class="wordmark">Ductulator</span>
+</div>
+
 <div class="bench">
-  <div class="instrument" id="rig" tabindex="0" role="slider"
-       aria-label="Ductulator card rotation" aria-valuemin="0" aria-valuemax="360"
-       aria-valuenow="0" aria-valuetext="0 degrees">
-    <svg class="layer disc" viewBox="__VIEW__" aria-hidden="true">
-      <circle class="disc-face" cx="0" cy="0" r="__R_DISC__"/>
-      __DISC__
-    </svg>
-    <svg class="layer card" id="card" viewBox="__VIEW__" aria-hidden="true">
-      __CARD__
-    </svg>
-    <svg class="layer hub" viewBox="__VIEW__" aria-hidden="true">
-      <circle class="pivot-ring" cx="0" cy="0" r="30"/>
-      <circle class="pivot-cap"  cx="0" cy="0" r="21"/>
-      <circle class="pivot-hi"   cx="-6" cy="-7" r="6"/>
-    </svg>
+  <div class="zoomer" id="zoomer">
+    <div class="instrument" id="rig" tabindex="0" role="slider"
+         aria-label="Ductulator card rotation" aria-valuemin="0" aria-valuemax="360"
+         aria-valuenow="0" aria-valuetext="0 degrees">
+      <svg class="layer disc" viewBox="__VIEW__" aria-hidden="true">
+        <circle class="disc-face" cx="0" cy="0" r="__R_DISC__"/>
+        __DISC__
+      </svg>
+      <svg class="layer card" id="card" viewBox="__VIEW__" aria-hidden="true">
+        __CARD__
+      </svg>
+      <svg class="layer hub" viewBox="__VIEW__" aria-hidden="true">
+        <circle class="pivot-ring" cx="0" cy="0" r="30"/>
+        <circle class="pivot-cap"  cx="0" cy="0" r="21"/>
+        <circle class="pivot-hi"   cx="-6" cy="-7" r="6"/>
+      </svg>
+    </div>
   </div>
 </div>
 
 <div class="strip">
   <div class="readout">
     <span class="val" id="deg">0.0&deg;</span>
-    <span class="lbl">Card angle</span>
+    <span class="lbl-cap">Card angle</span>
+  </div>
+  <div class="readout">
+    <span class="val" id="zoomval">1.0&times;</span>
+    <span class="lbl-cap">Zoom</span>
   </div>
   <div class="controls">
     <button class="nudge" id="ccw" type="button" aria-label="Rotate one degree counter-clockwise">&minus;1&deg;</button>
     <button class="nudge" id="cw"  type="button" aria-label="Rotate one degree clockwise">+1&deg;</button>
+    <button id="zoomout" type="button" aria-label="Zoom out">&minus;</button>
+    <button id="zoomin"  type="button" aria-label="Zoom in">+</button>
     <button id="reset" type="button">Reset</button>
   </div>
-  <p class="hint">Drag the card to spin it &middot; flick to let it coast &middot; <kbd>&larr;</kbd><kbd>&rarr;</kbd> nudge, <kbd>shift</kbd> for fine</p>
+  <p class="hint">Drag to spin &middot; pinch or scroll to zoom &middot; drag to pan when zoomed &middot; double-tap to zoom in</p>
 </div>
 
 <script>
 (function () {
-  var card = document.getElementById('card'),
-      rig  = document.getElementById('rig'),
-      out  = document.getElementById('deg'),
+  var card   = document.getElementById('card'),
+      rig    = document.getElementById('rig'),
+      zoomer = document.getElementById('zoomer'),
+      out    = document.getElementById('deg'),
+      zout   = document.getElementById('zoomval'),
       reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+  // ---- rotation state -----------------------------------------------------
   // Paper on paper around a metal grommet: it carries a little momentum,
   // then stops. Integrated against real elapsed time so the feel is the
   // same on a 60Hz and a 120Hz display.
-  var RETAIN_PER_SEC = 0.02,   // fraction of angular velocity kept after 1s
-      STOP_BELOW     = 6,      // deg/s
-      MAX_VEL        = 900;    // deg/s
+  var RETAIN_PER_SEC = 0.02, STOP_BELOW = 6, MAX_VEL = 900;
+  var angle = 0, vel = 0, raf = 0;
 
-  var angle = 0, vel = 0, raf = 0, dragging = false, pointerId = -1,
-      lastAng = 0, lastT = 0;
+  // ---- zoom state ---------------------------------------------------------
+  var MIN_Z = 1, MAX_Z = 8;
+  var z = 1, tx = 0, ty = 0;
+
+  // ---- pointer bookkeeping ------------------------------------------------
+  // Every active pointer, so one finger rotates and two pinch.
+  var pts = new Map();
+  var mode = null;             // 'rotate' | 'pinch'
+  var lastAng = 0, lastT = 0;  // rotate
+  var pinch0 = null;           // pinch anchor
 
   var norm = function (a) { return ((a % 360) + 360) % 360; };
+  var clamp = function (v, lo, hi) { return v < lo ? lo : v > hi ? hi : v; };
+
+  function applyZoom() {
+    // Keep the instrument from being dragged entirely off screen.
+    var r = zoomer.getBoundingClientRect();
+    var maxPan = Math.max(0, (r.width * z - r.width) / 2 / z + r.width * 0.1);
+    tx = clamp(tx, -maxPan, maxPan);
+    ty = clamp(ty, -maxPan, maxPan);
+    zoomer.style.transform = 'scale(' + z + ') translate(' + tx + 'px,' + ty + 'px)';
+    zout.textContent = z.toFixed(1) + '×';
+  }
 
   function render() {
     card.style.transform = 'rotate(' + angle.toFixed(3) + 'deg)';
@@ -162,10 +261,12 @@
     rig.setAttribute('aria-valuetext', n.toFixed(1) + ' degrees');
   }
 
-  function pointerAngle(ev) {
+  function pointerAngle(x, y) {
     var r = rig.getBoundingClientRect();
-    return Math.atan2(ev.clientX - (r.left + r.width / 2),
-                     -(ev.clientY - (r.top + r.height / 2))) * 180 / Math.PI;
+    // Uniform scale preserves angles, and the rect already reflects the
+    // current zoom and pan, so no correction is needed here.
+    return Math.atan2(x - (r.left + r.width / 2),
+                     -(y - (r.top + r.height / 2))) * 180 / Math.PI;
   }
   function shortest(a, b) {
     var d = a - b;
@@ -173,7 +274,6 @@
     while (d < -180) d += 360;
     return d;
   }
-
   function halt() { if (raf) { cancelAnimationFrame(raf); raf = 0; } vel = 0; }
 
   function coast(now) {
@@ -186,54 +286,131 @@
     raf = requestAnimationFrame(coast);
   }
 
-  // Deliberately no setPointerCapture here. Capturing a mouse pointer keeps
+  function centroid() {
+    var xs = 0, ys = 0, n = 0;
+    pts.forEach(function (p) { xs += p.x; ys += p.y; n++; });
+    return { x: xs / n, y: ys / n, n: n };
+  }
+  function spread() {
+    var a = null, b = null;
+    pts.forEach(function (p) { if (!a) a = p; else if (!b) b = p; });
+    return Math.hypot(a.x - b.x, a.y - b.y);
+  }
+
+  // Deliberately no setPointerCapture. Capturing a mouse pointer keeps
   // retargeting that pointerId to this element, so the next click on a button
   // in the control strip would be swallowed. Window listeners are both simpler
-  // and correct when the drag leaves the element.
-  rig.addEventListener('pointerdown', function (ev) {
+  // and correct when the gesture leaves the element.
+  zoomer.addEventListener('pointerdown', function (ev) {
     if (ev.button !== 0 && ev.pointerType === 'mouse') return;
+    pts.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
     halt();
-    dragging = true;
-    pointerId = ev.pointerId;
-    rig.classList.add('grabbing');
-    card.style.transition = 'none';
-    lastAng = pointerAngle(ev);
-    lastT = ev.timeStamp;
+    if (pts.size === 1) {
+      mode = 'rotate';
+      rig.classList.add('grabbing');
+      card.style.transition = 'none';
+      lastAng = pointerAngle(ev.clientX, ev.clientY);
+      lastT = ev.timeStamp;
+    } else if (pts.size === 2) {
+      mode = 'pinch';
+      var c = centroid();
+      pinch0 = { d: spread(), z: z, cx: c.x, cy: c.y, tx: tx, ty: ty };
+    }
     ev.preventDefault();
   });
 
   window.addEventListener('pointermove', function (ev) {
-    if (!dragging || ev.pointerId !== pointerId) return;
-    var a = pointerAngle(ev), d = shortest(a, lastAng),
-        dt = Math.max(4, ev.timeStamp - lastT);
-    angle += d;
-    // smooth the release velocity so one jittery frame can't fling the card
-    vel = vel * 0.6 + (d / dt * 1000) * 0.4;
-    lastAng = a; lastT = ev.timeStamp;
-    render();
+    if (!pts.has(ev.pointerId)) return;
+    pts.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
+
+    if (mode === 'pinch' && pts.size >= 2 && pinch0) {
+      var d = spread();
+      z = clamp(pinch0.z * (d / pinch0.d), MIN_Z, MAX_Z);
+      var c = centroid();
+      // Pan by however far the two-finger centroid travelled.
+      tx = pinch0.tx + (c.x - pinch0.cx) / z;
+      ty = pinch0.ty + (c.y - pinch0.cy) / z;
+      applyZoom();
+      return;
+    }
+
+    if (mode === 'rotate' && pts.size === 1) {
+      if (z > 1.02 && ev.shiftKey) {           // shift-drag pans instead
+        tx += ev.movementX / z; ty += ev.movementY / z; applyZoom(); return;
+      }
+      var a = pointerAngle(ev.clientX, ev.clientY),
+          dd = shortest(a, lastAng),
+          dt = Math.max(4, ev.timeStamp - lastT);
+      angle += dd;
+      // smooth the release velocity so one jittery frame can't fling the card
+      vel = vel * 0.6 + (dd / dt * 1000) * 0.4;
+      lastAng = a; lastT = ev.timeStamp;
+      render();
+    }
   });
 
   function release(ev) {
-    if (!dragging || ev.pointerId !== pointerId) return;
-    dragging = false;
-    pointerId = -1;
-    rig.classList.remove('grabbing');
-    if (ev.timeStamp - lastT > 80) vel = 0;          // paused before letting go = no throw
-    vel = Math.max(-MAX_VEL, Math.min(MAX_VEL, vel));
-    if (reduce || Math.abs(vel) < STOP_BELOW) { vel = 0; return; }
-    lastT = performance.now();
-    raf = requestAnimationFrame(coast);
+    if (!pts.has(ev.pointerId)) return;
+    pts.delete(ev.pointerId);
+
+    if (mode === 'pinch') {
+      if (pts.size === 1) {                    // one finger lifted: resume rotating
+        mode = 'rotate';
+        var only = null;
+        pts.forEach(function (p) { only = p; });
+        lastAng = pointerAngle(only.x, only.y);
+        lastT = ev.timeStamp;
+        vel = 0;
+      } else if (pts.size === 0) {
+        mode = null; pinch0 = null;
+      }
+      return;
+    }
+
+    if (pts.size === 0) {
+      mode = null;
+      rig.classList.remove('grabbing');
+      if (ev.timeStamp - lastT > 80) vel = 0;  // paused before letting go = no throw
+      vel = clamp(vel, -MAX_VEL, MAX_VEL);
+      if (reduce || Math.abs(vel) < STOP_BELOW) { vel = 0; return; }
+      lastT = performance.now();
+      raf = requestAnimationFrame(coast);
+    }
   }
   window.addEventListener('pointerup', release);
   window.addEventListener('pointercancel', release);
-  rig.addEventListener('dragstart', function (ev) { ev.preventDefault(); });
+  zoomer.addEventListener('dragstart', function (ev) { ev.preventDefault(); });
+
+  // Trackpad pinch arrives as wheel + ctrlKey; a plain wheel zooms too.
+  zoomer.addEventListener('wheel', function (ev) {
+    ev.preventDefault();
+    halt();
+    var f = Math.exp(-ev.deltaY * (ev.ctrlKey ? 0.01 : 0.0015));
+    z = clamp(z * f, MIN_Z, MAX_Z);
+    applyZoom();
+  }, { passive: false });
+
+  // Double-tap / double-click toggles a close-up.
+  zoomer.addEventListener('dblclick', function (ev) {
+    ev.preventDefault();
+    z = z > 1.6 ? 1 : 3;
+    if (z === 1) { tx = ty = 0; }
+    applyZoom();
+  });
 
   function nudge(step) { halt(); card.style.transition = 'none'; angle += step; render(); }
   document.getElementById('cw').onclick  = function () { nudge(1); };
   document.getElementById('ccw').onclick = function () { nudge(-1); };
+  document.getElementById('zoomin').onclick  = function () { z = clamp(z * 1.4, MIN_Z, MAX_Z); applyZoom(); };
+  document.getElementById('zoomout').onclick = function () {
+    z = clamp(z / 1.4, MIN_Z, MAX_Z);
+    if (z === 1) { tx = ty = 0; }
+    applyZoom();
+  };
 
   document.getElementById('reset').onclick = function () {
     halt();
+    z = 1; tx = ty = 0; applyZoom();
     var target = angle - shortest(norm(angle), 0);   // unwind the short way round
     if (reduce) { card.style.transition = 'none'; angle = 0; render(); return; }
     card.style.transition = 'transform 500ms cubic-bezier(.22,.9,.24,1)';
@@ -248,8 +425,12 @@
     else if (ev.key === 'PageUp')   { nudge(15);  ev.preventDefault(); }
     else if (ev.key === 'PageDown') { nudge(-15); ev.preventDefault(); }
     else if (ev.key === 'Home')     { nudge(-norm(angle)); ev.preventDefault(); }
+    else if (ev.key === '+' || ev.key === '=') { z = clamp(z * 1.4, MIN_Z, MAX_Z); applyZoom(); ev.preventDefault(); }
+    else if (ev.key === '-' || ev.key === '_') { z = clamp(z / 1.4, MIN_Z, MAX_Z); if (z === 1) tx = ty = 0; applyZoom(); ev.preventDefault(); }
+    else if (ev.key === '0') { z = 1; tx = ty = 0; applyZoom(); ev.preventDefault(); }
   });
 
+  applyZoom();
   render();
 })();
 </script>
