@@ -41,7 +41,10 @@ try {
     const discT = () => p.$eval('.layer.disc', el => getComputedStyle(el).transform);
     const discBefore = await discT();
 
-    // quarter turn, measured BEFORE release so inertia doesn't skew it
+    // quarter turn, measured BEFORE release so inertia doesn't skew it.
+    // Sample on the next frame rather than after a fixed delay: a delay long
+    // enough to flush the final pointermove also trips the app's own
+    // "you paused, so don't throw" guard and kills the inertia assertion.
     let midDrag;
     if (touch) {
       await p.touchscreen.touchStart(cx, cy-R);
@@ -90,7 +93,7 @@ try {
     ok('nudge buttons step the card', Math.abs((await ang(p))-1)<0.001, `${(await ang(p)).toFixed(2)}°`);
 
     ok('no JS errors', jsErrs.length===0, jsErrs.join(' | '));
-    if (netErrs.length) console.log(`  note: ${netErrs.length} offline resource error(s) — Google Fonts, expected in sandbox`);
+    if (netErrs.length) console.log(`  note: ${netErrs.length} offline resource error(s) — Google Fonts, expected offline`);
 
     await p.screenshot({ path: touch ? '/tmp/shot-mobile.png' : '/tmp/shot-light.png' });
     if (!touch) {

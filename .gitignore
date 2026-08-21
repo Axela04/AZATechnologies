@@ -17,4 +17,6 @@ build/embedded.provisionprofile
 *.mobileprovision
 *.p12
 *.cer
+
+# build output of vector/vectorize.py
 ductulator.html
