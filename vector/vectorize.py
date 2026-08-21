@@ -173,9 +173,12 @@ def potrace(mask: np.ndarray, tmp: Path, name: str, turd=2, opt=0.25):
         b"P4\n%d %d\n" % (w, h)
         + np.packbits(mask.astype(np.uint8), axis=1).tobytes()
     )
+    # -u 1 quantizes coordinates to whole 300-dpi pixels. That is 1/300 in on a
+    # ~7.9 in instrument — far below anything a display resolves — and it drops
+    # a digit from every coordinate, shrinking the emitted paths by about 23%.
     subprocess.run(
         ["potrace", "-b", "svg", "-t", str(turd), "-a", "1.0",
-         "-O", str(opt), "-o", str(svg), str(pbm)],
+         "-O", str(opt), "-u", "1", "-o", str(svg), str(pbm)],
         check=True,
     )
     body = re.search(r'<g transform="([^"]+)"[^>]*>(.*?)</g>',
