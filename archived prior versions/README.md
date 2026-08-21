@@ -18,9 +18,6 @@ The bundled single-file output of this version is `aza-ductulator.html`:
 
 ```sh
 git show 5dd975a:aza-ductulator.html > v1-ductulator.html   # then open it
-```
-
-```sh
 git show 4398dd5:src/wheel.ts        # the scale geometry
 git show 4398dd5:src/ductulator.ts   # the friction / velocity math
 git show 4398dd5:src/card.ts
