@@ -20,3 +20,5 @@ build/embedded.provisionprofile
 
 # build output of vector/vectorize.py
 ductulator.html
+__pycache__/
+*.pyc
