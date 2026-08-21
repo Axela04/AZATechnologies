@@ -3,17 +3,10 @@
 Superseded work. Nothing here is maintained — the current version is
 `vector/` plus the `ductulator.html` it builds, at the repository root.
 
-## What is in this folder
-
-| File | What it was |
-|---|---|
-| `aza-ductulator.html` | The hand-drawn build, bundled to one self-contained file. Every scale is generated in code from the friction equation, so the artwork is drawn rather than taken from the real instrument. Open it in any browser. |
-
-## Versions kept in git history rather than as files
-
-The rest of the prior work is in the commit history, which is where source
-belongs — copying it back out as files would only duplicate what git already
-stores. Retrieve any of it with `git show <sha>:<path>`.
+This file is the index. The versions themselves are in the commit history,
+which is where they belong — copying them back out would only duplicate what
+git already stores, and one of them is 5 MB. Retrieve any of it with
+`git show <sha>:<path>`, as shown under each version below.
 
 ### v1 — hand-drawn SVG, TypeScript (`4afcb34` … `5dd975a`)
 
@@ -21,9 +14,10 @@ The scales were drawn from scratch in code from the ASHRAE friction equation,
 with a Vite/TypeScript build and Capacitor + Electron wrappers for the app
 stores. It computed answers rather than letting you read them off the wheel,
 which was the wrong model: a ductulator does not calculate anything, it aligns.
-`aza-ductulator.html` in this folder is the bundled output of this version.
+The bundled single-file output of this version is `aza-ductulator.html`:
 
 ```sh
+git show 5dd975a:aza-ductulator.html > v1-ductulator.html   # then open it
 git show 4398dd5:src/wheel.ts        # the scale geometry
 git show 4398dd5:src/ductulator.ts   # the friction / velocity math
 git show 4398dd5:src/card.ts
