@@ -1,7 +1,7 @@
 import puppeteer from 'puppeteer';
 import { readFileSync, writeFileSync } from 'node:fs';
 
-const SRC = '/home/user/AZATechnologies/ductulator.html';
+const SRC = process.argv[2] || 'ductulator.html';
 writeFileSync('/tmp/wrapped.html',
   `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">`+
   `</head><body>${readFileSync(SRC,'utf8')}</body></html>`);
