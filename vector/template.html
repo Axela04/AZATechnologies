@@ -2,13 +2,13 @@
 
 <style>
   /* ---- AZA brand palette -------------------------------------------------
-     Taken from the AZA mark: azure blue, forest green, and the neutral grey
-     of the wordmark. Every brand colour in the page resolves through these
-     three, so correcting them to the official values is a three-line edit. */
+     Sampled from AZALogo_Color_250x150px.svg, so these are the real values,
+     not an approximation: .st0 is the blue of the A-Z-A mark, .st1/.st2 the
+     grey of its right legs and of ENGINEERING. The supplied logo carries no
+     green. */
   :root {
-    --aza-blue:  #0F76BC;
-    --aza-green: #3F8F3A;
-    --aza-grey:  #8A8D90;
+    --aza-blue:  #1C75BC;
+    --aza-grey:  #A7A9AC;
 
     --ground:#dee1e6; --ground-2:#ccd1d8; --line:#b3bac4;
     --ink:#18202a; --ink-dim:#59636f;
@@ -23,7 +23,7 @@
       --ink:#e4e9ef; --ink-dim:#8a94a1;
       --accent:#4aa8e8;
       --paper:#f5f3ee; --engrave:#16191d;
-      --spot:#0F76BC;
+      --spot:#1C75BC;
       --shadow:rgba(0,0,0,.60); --focus:#6fb0f5;
     }
   }
@@ -32,7 +32,7 @@
     --ink:#e4e9ef; --ink-dim:#8a94a1;
     --accent:#4aa8e8;
     --paper:#f5f3ee; --engrave:#16191d;
-    --spot:#0F76BC;
+    --spot:#1C75BC;
     --shadow:rgba(0,0,0,.60); --focus:#6fb0f5;
   }
 
@@ -54,17 +54,7 @@
     flex:0 0 auto; display:flex; align-items:center; gap:10px;
     padding:10px clamp(12px,3vw,26px) 6px;
   }
-  .mark { display:flex; align-items:baseline; gap:1px; line-height:1; }
-  .mark-a1, .mark-z, .mark-a2 {
-    font-size:25px; font-weight:700; letter-spacing:.01em;
-  }
-  .mark-a1 { color:var(--aza-blue); }
-  .mark-z  { color:var(--aza-green); }
-  .mark-a2 { color:var(--aza-grey); }
-  .mark-sub {
-    margin-left:9px; font-size:10px; font-weight:600;
-    letter-spacing:.26em; text-transform:uppercase; color:var(--aza-grey);
-  }
+  .mark { display:block; height:34px; width:auto; }
   .wordmark {
     margin-left:auto;
     font-size:11px; letter-spacing:.26em; text-transform:uppercase;
@@ -106,6 +96,7 @@
   .layer.hub  { z-index:3; }
 
   .stock{fill:var(--paper)} .engrave{fill:var(--engrave)} .spot{fill:var(--spot)}
+  .pointer{fill:var(--aza-blue)}   /* duct-diameter arrow */
   .disc-face{ fill:var(--paper); }
   .pivot-ring{fill:none;stroke:color-mix(in srgb,var(--engrave) 45%,transparent);stroke-width:4}
   .pivot-cap{fill:var(--engrave)} .pivot-hi{fill:color-mix(in srgb,var(--paper) 65%,transparent)}
@@ -147,6 +138,10 @@
   button:hover { border-color:var(--accent); color:var(--accent); }
   button:focus-visible { outline:2px solid var(--focus); outline-offset:2px; }
   button.nudge { font-variant-numeric:tabular-nums; letter-spacing:0; padding:9px 11px; }
+  button[aria-pressed="true"] {
+    background:var(--aza-blue); border-color:var(--aza-blue); color:#fff;
+  }
+  button[aria-pressed="true"]:hover { color:#fff; }
 
   .hint { font-size:12px; color:var(--ink-dim); margin:0; }
   .hint kbd {
@@ -162,14 +157,33 @@
 </style>
 
 <div class="brandbar">
-  <!-- Set from type in the brand colours rather than redrawn by hand: the
-       supplied mark was a small raster, and an approximated outline would be a
-       worse likeness than clean letterforms. Drop a real logo in here when
-       there is a vector copy of it. -->
-  <span class="mark" aria-label="AZA Technologies" role="img">
-    <span class="mark-a1">A</span><span class="mark-z">Z</span><span class="mark-a2">A</span>
-    <span class="mark-sub">Technologies</span>
-  </span>
+  <!-- AZALogo_Color_250x150px.svg, inlined verbatim. -->
+  <svg class="mark" viewBox="0 0 250 150" role="img" aria-label="AZA Engineering">
+    <g fill="#1C75BC" stroke="#1C75BC" stroke-width="3.5482" stroke-miterlimit="10">
+      <path d="M27.6,66.9h6.1c0.2,0,0.4,0.2,0.4,0.4v6.9c0,0.2-0.2,0.4-0.4,0.4h-6.1"/>
+      <path d="M83.2,94.3c-1.5-2.6-2.9-5.3-4.6-7.8c-9.2-14.3-18.4-28.6-27.6-42.9c-0.4-0.7-0.9-1.3-1.6-2.3c-3.8,5.9-7.5,11.5-11.1,17.1c-7.3,11.2-14.6,22.3-21.9,33.5c-0.5,0.8-0.9,1.6-1.3,2.4c-3.3,0-6.5,0-9.8,0c9.7-14.7,19.4-29.4,29-44c3.4-5.2,6.9-10.3,10.3-15.5c2.3-3.5,7.3-3.6,9.6-0.1c12.4,18.9,24.8,37.7,37.2,56.5c0.6,0.9,1.4,1.6,2.1,2.5c-1.5,0.2-3.1,0.5-4.6,0.6C87.1,94.4,85.2,94.3,83.2,94.3z"/>
+      <path d="M84.8,94.3c-0.2,0-0.4-0.2-0.4-0.4c0-1.8-0.1-3.4,0-5.1c0-0.4,0.5-0.9,0.9-1.2c8.5-6.3,17.1-12.6,25.7-18.9c12.7-9.3,25.3-18.6,38-28c0,0,0.1-0.1,0.1-0.1c0.3-0.3,0.1-0.8-0.3-0.8H84.8c-0.2,0-0.4-0.2-0.4-0.4v-6.6c0-0.2,0.2-0.4,0.4-0.4h80.5c0.2,0,0.4,0.2,0.4,0.4c0,1.7,0,3.4,0,5.1c0,0.4-0.6,0.8-0.9,1.1c-8,5.9-16,11.8-24,17.6c-13.3,9.7-26.6,19.4-39.8,29.2c0,0,0,0,0,0c-0.3,0.2-0.2,0.8,0.3,0.8h64.1c0.2,0,0.4,0.2,0.4,0.4v6.9c0,0.2-0.2,0.4-0.4,0.4H84.8z"/>
+      <path d="M177.8,66.8h6.1c0.2,0,0.4,0.2,0.4,0.4v6.9c0,0.2-0.2,0.4-0.4,0.4h-6.1"/>
+      <path d="M233.6,94.2c-1.5-2.6-2.9-5.3-4.6-7.8c-9.2-14.3-18.4-28.6-27.6-42.9c-0.4-0.7-0.9-1.3-1.6-2.3c-3.8,5.9-7.5,11.5-11.1,17.1c-7.3,11.2-15.5,21.8-21.9,33.5c-0.4,0.7-1,1.7-1.4,2.5c-3.3,0-6.4-0.1-9.7-0.1c9.7-14.7,19.4-29.4,29-44c3.4-5.2,6.9-10.3,10.3-15.5c2.3-3.5,7.3-3.6,9.6-0.1c12.4,18.9,24.8,37.7,37.2,56.6c0.7,1.3,0.8,1.3,1.6,2.8c-1.9,0.1-1.9,0.1-4.1,0.2C237.8,94.2,235.6,94.2,233.6,94.2z"/>
+    </g>
+    <g fill="#A7A9AC" stroke="#A7A9AC" stroke-width="3.5482" stroke-miterlimit="10">
+      <path d="M44.7,34.8c2.3-3.5,7.3-3.6,9.6-0.1c12.4,18.9,24.8,37.7,37.2,56.5c0.6,0.9,1.4,2.1,2.1,3.1c-1.7,0-2.6,0-4.6,0c-1.9,0-3.9,0-5.8,0c-1.5-2.6-2.9-5.3-4.6-7.8c-9.2-14.3-18.4-28.6-27.6-42.9c-0.4-0.7-0.9-1.3-1.6-2.3L44.7,34.8z"/>
+      <path d="M195.1,34.7c2.3-3.5,7.3-3.6,9.6-0.1c12.4,18.9,24.8,37.7,37.2,56.5c0.6,0.9,1.4,2.1,2.1,3.1c-1.7,0-2.6,0-4.6,0c-1.9,0-3.9,0-5.8,0c-1.5-2.6-2.9-5.3-4.6-7.8c-9.2-14.3-18.4-28.6-27.6-42.9c-0.4-0.7-0.9-1.3-1.6-2.3L195.1,34.7z"/>
+    </g>
+    <g fill="#A7A9AC">
+      <path d="M16,119H5.4v-18.9h10.2v2.7h-7v5.3h6.5v2.6H8.6v5.6H16V119z"/>
+      <path d="M42.4,119H39l-9-13.9c-0.2-0.4-0.4-0.7-0.6-1.1h-0.1c0.1,0.4,0.1,1.3,0.1,2.6V119h-3v-18.9h3.6l8.7,13.6c0.4,0.6,0.6,0.9,0.7,1.2h0.1c-0.1-0.5-0.1-1.3-0.1-2.5v-12.2h3V119z"/>
+      <path d="M68.9,117.7c-2,1.1-4.2,1.6-6.6,1.6c-2.8,0-5.1-0.9-6.8-2.6c-1.7-1.7-2.6-4-2.6-6.9c0-2.9,0.9-5.3,2.8-7.2c1.9-1.9,4.3-2.8,7.2-2.8c2.1,0,3.9,0.3,5.3,0.9v3.2c-1.4-1-3.2-1.4-5.2-1.4c-2,0-3.7,0.7-4.9,2c-1.3,1.3-1.9,3-1.9,5.2c0,2.2,0.6,3.9,1.7,5.1c1.1,1.2,2.6,1.9,4.5,1.9c1.3,0,2.4-0.3,3.4-0.8v-4.5h-4v-2.6h7.1V117.7z"/>
+      <path d="M83.2,119h-3.2v-18.9h3.2V119z"/>
+      <path d="M110.8,119h-3.4l-9-13.9c-0.2-0.4-0.4-0.7-0.6-1.1h-0.1c0.1,0.4,0.1,1.3,0.1,2.6V119h-3v-18.9h3.6l8.7,13.6c0.4,0.6,0.6,0.9,0.7,1.2h0.1c-0.1-0.5-0.1-1.3-0.1-2.5v-12.2h3V119z"/>
+      <path d="M133.1,119h-10.6v-18.9h10.2v2.7h-7v5.3h6.5v2.6h-6.5v5.6h7.5V119z"/>
+      <path d="M154.1,119h-10.6v-18.9h10.2v2.7h-7v5.3h6.5v2.6h-6.5v5.6h7.5V119z"/>
+      <path d="M179.1,119h-3.7l-3-5.1c-0.3-0.5-0.5-0.9-0.8-1.2c-0.3-0.3-0.5-0.6-0.8-0.8c-0.3-0.2-0.6-0.4-0.9-0.5c-0.3-0.1-0.7-0.1-1.1-0.1h-1.3v7.7h-3.1v-18.9h6.2c0.9,0,1.7,0.1,2.5,0.3c0.7,0.2,1.4,0.5,1.9,1c0.6,0.4,1,1,1.3,1.6c0.3,0.6,0.5,1.4,0.5,2.2c0,0.7-0.1,1.3-0.3,1.8c-0.2,0.6-0.5,1.1-0.8,1.5c-0.4,0.4-0.8,0.8-1.3,1.1c-0.5,0.3-1.1,0.5-1.7,0.7v0.1c0.3,0.2,0.6,0.4,0.9,0.6c0.3,0.2,0.5,0.5,0.7,0.7c0.2,0.2,0.5,0.5,0.7,0.8c0.2,0.3,0.5,0.7,0.7,1.1L179.1,119z M167.6,102.6v6.1h2.6c0.5,0,0.9-0.1,1.3-0.2c0.4-0.1,0.8-0.4,1.1-0.6c0.3-0.3,0.5-0.6,0.7-1c0.2-0.4,0.3-0.9,0.3-1.4c0-0.9-0.3-1.6-0.9-2.1c-0.6-0.5-1.4-0.8-2.5-0.8H167.6z"/>
+      <path d="M191.5,119h-3.2v-18.9h3.2V119z"/>
+      <path d="M219.2,119h-3.4l-9-13.9c-0.2-0.4-0.4-0.7-0.6-1.1h-0.1c0.1,0.4,0.1,1.3,0.1,2.6V119h-3v-18.9h3.6l8.7,13.6c0.4,0.6,0.6,0.9,0.7,1.2h0.1c-0.1-0.5-0.1-1.3-0.1-2.5v-12.2h3V119z"/>
+      <path d="M245.6,117.7c-2,1.1-4.2,1.6-6.6,1.6c-2.8,0-5.1-0.9-6.8-2.6s-2.6-4-2.6-6.9c0-2.9,0.9-5.3,2.8-7.2c1.9-1.9,4.3-2.8,7.2-2.8c2.1,0,3.9,0.3,5.3,0.9v3.2c-1.4-1-3.2-1.4-5.2-1.4c-2,0-3.7,0.7-4.9,2c-1.3,1.3-1.9,3-1.9,5.2c0,2.2,0.6,3.9,1.7,5.1c1.1,1.2,2.6,1.9,4.5,1.9c1.3,0,2.4-0.3,3.4-0.8v-4.5h-4v-2.6h7.1V117.7z"/>
+    </g>
+  </svg>
   <span class="wordmark">Ductulator</span>
 </div>
 
@@ -208,9 +222,11 @@
     <button class="nudge" id="cw"  type="button" aria-label="Rotate one degree clockwise">+1&deg;</button>
     <button id="zoomout" type="button" aria-label="Zoom out">&minus;</button>
     <button id="zoomin"  type="button" aria-label="Zoom in">+</button>
+    <button id="panmode" type="button" aria-pressed="false"
+            aria-label="Toggle between spinning the card and panning the view">Pan</button>
     <button id="reset" type="button">Reset</button>
   </div>
-  <p class="hint">Drag to spin &middot; pinch or scroll to zoom &middot; drag to pan when zoomed &middot; double-tap to zoom in</p>
+  <p class="hint">Drag to spin &middot; pinch or scroll to zoom &middot; <b>Pan</b> (or hold space, or drag with two fingers) to move around when zoomed</p>
 </div>
 
 <script>
@@ -236,17 +252,22 @@
   // ---- pointer bookkeeping ------------------------------------------------
   // Every active pointer, so one finger rotates and two pinch.
   var pts = new Map();
-  var mode = null;             // 'rotate' | 'pinch'
+  var mode = null;             // 'rotate' | 'pinch' | 'pan'
+  var panMode = false;         // the Pan button; space and middle-drag also pan
+  var spaceHeld = false;       // holding space pans, as in most drawing tools
   var lastAng = 0, lastT = 0;  // rotate
+  var lastPan = null;          // pan: last pointer position, in screen px
   var pinch0 = null;           // pinch anchor
 
   var norm = function (a) { return ((a % 360) + 360) % 360; };
   var clamp = function (v, lo, hi) { return v < lo ? lo : v > hi ? hi : v; };
 
   function applyZoom() {
-    // Keep the instrument from being dragged entirely off screen.
-    var r = zoomer.getBoundingClientRect();
-    var maxPan = Math.max(0, (r.width * z - r.width) / 2 / z + r.width * 0.1);
+    // tx/ty are local units: `translate` is applied before `scale`, so a screen
+    // pixel is 1/z of one. The travel needed to bring an edge to the centre is
+    // w*(z-1)/(2z); the extra 12% is slack so edges are comfortably reachable.
+    var w = zoomer.offsetWidth || 1;
+    var maxPan = w * (z - 1) / (2 * z) + w * 0.12;
     tx = clamp(tx, -maxPan, maxPan);
     ty = clamp(ty, -maxPan, maxPan);
     zoomer.style.transform = 'scale(' + z + ') translate(' + tx + 'px,' + ty + 'px)';
@@ -302,14 +323,19 @@
   // in the control strip would be swallowed. Window listeners are both simpler
   // and correct when the gesture leaves the element.
   zoomer.addEventListener('pointerdown', function (ev) {
-    if (ev.button !== 0 && ev.pointerType === 'mouse') return;
+    // Left button spins; middle and right always pan, as they do in map and
+    // drawing tools. Holding space pans too, and so does the Pan button.
+    var wantsPan = panMode || spaceHeld || ev.button === 1 || ev.button === 2;
+    if (ev.button !== 0 && ev.button !== 1 && ev.button !== 2
+        && ev.pointerType === 'mouse') return;
     pts.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
     halt();
     if (pts.size === 1) {
-      mode = 'rotate';
+      mode = wantsPan ? 'pan' : 'rotate';
       rig.classList.add('grabbing');
       card.style.transition = 'none';
       lastAng = pointerAngle(ev.clientX, ev.clientY);
+      lastPan = { x: ev.clientX, y: ev.clientY };
       lastT = ev.timeStamp;
     } else if (pts.size === 2) {
       mode = 'pinch';
@@ -334,10 +360,26 @@
       return;
     }
 
-    if (mode === 'rotate' && pts.size === 1) {
-      if (z > 1.02 && ev.shiftKey) {           // shift-drag pans instead
-        tx += ev.movementX / z; ty += ev.movementY / z; applyZoom(); return;
+    if (mode === 'pan' && pts.size === 1) {
+      // Divide by z: tx/ty are applied inside the scaled element, so a screen
+      // pixel is 1/z of a local one and the content would otherwise outrun the
+      // cursor as you zoom in.
+      if (lastPan) {
+        tx += (ev.clientX - lastPan.x) / z;
+        ty += (ev.clientY - lastPan.y) / z;
       }
+      lastPan = { x: ev.clientX, y: ev.clientY };
+      applyZoom();
+      return;
+    }
+
+    if (mode === 'rotate' && pts.size === 1) {
+      if (ev.shiftKey) {                       // shift-drag pans too
+        if (lastPan) { tx += (ev.clientX - lastPan.x) / z; ty += (ev.clientY - lastPan.y) / z; }
+        lastPan = { x: ev.clientX, y: ev.clientY };
+        applyZoom(); return;
+      }
+      lastPan = { x: ev.clientX, y: ev.clientY };
       var a = pointerAngle(ev.clientX, ev.clientY),
           dd = shortest(a, lastAng),
           dt = Math.max(4, ev.timeStamp - lastT);
@@ -368,8 +410,11 @@
     }
 
     if (pts.size === 0) {
+      var wasPan = mode === 'pan';
       mode = null;
+      lastPan = null;
       rig.classList.remove('grabbing');
+      if (wasPan) { vel = 0; return; }
       if (ev.timeStamp - lastT > 80) vel = 0;  // paused before letting go = no throw
       vel = clamp(vel, -MAX_VEL, MAX_VEL);
       if (reduce || Math.abs(vel) < STOP_BELOW) { vel = 0; return; }
@@ -398,6 +443,21 @@
     applyZoom();
   });
 
+  window.addEventListener('keydown', function (ev) {
+    if (ev.code === 'Space') { spaceHeld = true; zoomer.style.cursor = 'grab'; ev.preventDefault(); }
+  });
+  window.addEventListener('keyup', function (ev) {
+    if (ev.code === 'Space') { spaceHeld = false; zoomer.style.cursor = ''; }
+  });
+  zoomer.addEventListener('contextmenu', function (ev) { ev.preventDefault(); });
+
+  var panBtn = document.getElementById('panmode');
+  panBtn.onclick = function () {
+    panMode = !panMode;
+    panBtn.setAttribute('aria-pressed', panMode ? 'true' : 'false');
+    zoomer.style.cursor = panMode ? 'grab' : '';
+  };
+
   function nudge(step) { halt(); card.style.transition = 'none'; angle += step; render(); }
   document.getElementById('cw').onclick  = function () { nudge(1); };
   document.getElementById('ccw').onclick = function () { nudge(-1); };
@@ -411,6 +471,7 @@
   document.getElementById('reset').onclick = function () {
     halt();
     z = 1; tx = ty = 0; applyZoom();
+    panMode = false; panBtn.setAttribute('aria-pressed', 'false'); zoomer.style.cursor = '';
     var target = angle - shortest(norm(angle), 0);   // unwind the short way round
     if (reduce) { card.style.transition = 'none'; angle = 0; render(); return; }
     card.style.transition = 'transform 500ms cubic-bezier(.22,.9,.24,1)';

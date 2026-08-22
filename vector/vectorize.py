@@ -31,6 +31,7 @@ DPI = 300
 VIEW = 1220          # half-width of the emitted viewBox, in 300-dpi pixels
 CARD_CLIP = 1102     # card edge radius; also crops binder punch-hole nubs
 DISC_FACE = 1098     # painted disc radius, just inside the card edge
+EDGE_TRIM = 3        # px of cut-edge shadow to shave off every opening
 
 
 # ---------------------------------------------------------------- raster io
@@ -145,6 +146,54 @@ def radius_map(shape, hub) -> np.ndarray:
     return np.hypot(xx - hub[0], yy - hub[1])
 
 
+def _dilate(mask: np.ndarray, k: int) -> np.ndarray:
+    g = mask.copy()
+    for _ in range(k):
+        n = g.copy()
+        n[1:, :] |= g[:-1, :]
+        n[:-1, :] |= g[1:, :]
+        n[:, 1:] |= g[:, :-1]
+        n[:, :-1] |= g[:, 1:]
+        g = n
+    return g
+
+
+def near_edge(card: np.ndarray, width: int, pinhole: int = 4) -> np.ndarray:
+    """Pixels within `width` of a cut edge — the card rim or a window boundary.
+
+    The scanner reads the physical cut edges as dark lines, which trace as
+    stray arcs hugging every opening. They cannot be dropped as whole
+    components because they merge with the tick marks that meet them, so the
+    band itself is subtracted instead. At 300 dpi a few pixels is under a
+    hundredth of an inch, so tick marks lose nothing visible.
+
+    The card mask is closed first. Scan noise leaves a scatter of one- and
+    two-pixel pinholes across the card face, and dilating those punches holes
+    straight through whatever lettering surrounds them — the wording under the
+    friction scale lost 18% of its ink that way. Closing removes the pinholes
+    while leaving the real openings, which are hundreds of pixels across,
+    untouched.
+    """
+    solid = ~_dilate(~_dilate(card, pinhole), pinhole)   # morphological close
+    return _dilate(~solid, width) & card
+
+
+def split_arrow(dark: np.ndarray, min_area=1500, min_fill=0.45):
+    """Separate the duct-diameter pointer from the rest of the printed ink.
+
+    It is the one solid blob on the card: every other mark is a thin rule or a
+    glyph, so a filled bounding box plus a size floor identifies it on its own
+    without hard-coding where it sits.
+    """
+    arrow = np.zeros_like(dark)
+    for n, px in components(dark, min_area):
+        w = px[:, 1].max() - px[:, 1].min() + 1
+        h = px[:, 0].max() - px[:, 0].min() + 1
+        if n / (w * h) >= min_fill:
+            arrow[px[:, 0], px[:, 1]] = True
+    return arrow, dark & ~arrow
+
+
 # -------------------------------------------------------------- pivot + art
 
 def find_hub(rgb: np.ndarray, min_area=300, max_area=20000):
@@ -211,7 +260,11 @@ def trace_all(bottom_pdf: Path, top_pdf: Path, tmp: Path) -> dict:
 
     lum = 0.299 * r + 0.587 * g + 0.114 * b
     red = drop_specks(card & (r - np.maximum(g, b) > 45) & (r > 90), 60)
-    dark = drop_specks(card & (lum < 128) & ~red, 12)
+    dark = card & (lum < 128) & ~red
+    dark &= ~near_edge(card, EDGE_TRIM)     # drop the scanned cut-edge shadow
+    dark = drop_specks(dark, 12)
+    arrow, dark = split_arrow(dark)         # the pointer gets its own colour
+    print(f"  arrow {arrow.sum():,} px split out of the ink")
 
     # ---- bottom page: line art only, minus the grommet and the part number
     bot = load_rgb(disc_png).astype(np.int16)
@@ -233,6 +286,7 @@ def trace_all(bottom_pdf: Path, top_pdf: Path, tmp: Path) -> dict:
         "card": potrace(card, tmp, "card", turd=60, opt=0.30),
         "ink": potrace(dark, tmp, "ink", turd=1, opt=0.25),
         "red": potrace(red, tmp, "red", turd=1, opt=0.25),
+        "arrow": potrace(arrow, tmp, "arrow", turd=40, opt=0.30),
     }
     return out
 
@@ -251,7 +305,7 @@ def build_html(traced: dict) -> str:
             f'{layer("disc", "engrave")}</g>')
     card = (f'<g transform="translate({-ht[0]:.1f},{-ht[1]:.1f})">'
             f'{layer("card", "stock")}{layer("ink", "engrave")}'
-            f'{layer("red", "spot")}</g>')
+            f'{layer("red", "spot")}{layer("arrow", "pointer")}</g>')
 
     html = TEMPLATE_PATH.read_text()
     return (html.replace("__DISC__", disc)
